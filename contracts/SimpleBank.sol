@@ -10,7 +10,7 @@ contract SimpleBank {
 
     /* State variables
      */
-    address public owner = msg.sender ;
+    
     
     // Fill in the visibility keyword. 
     // Hint: We want to protect our users balance from other contracts
@@ -23,7 +23,9 @@ contract SimpleBank {
 
     // Let's make sure everyone knows who owns the bank, yes, fill in the
     // appropriate visilibility keyword
-    address owner = msg.sender;
+    //address owner = msg.sender;
+    
+    address public owner = msg.sender ;
     
     /* Events - publicize actions to external listeners
      */
