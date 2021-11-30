@@ -9,32 +9,30 @@ pragma solidity >=0.5.16 <0.9.0;
 contract SimpleBank {
 
     /* State variables
-
-    
      */
-
-         address public owner = msg.sender;
-
-
     
     
     // Fill in the visibility keyword. 
     // Hint: We want to protect our users balance from other contracts
+
     mapping (address => uint) balances ;
     
     // Fill in the visibility keyword
     // Hint: We want to create a getter function and allow contracts to be able
     //       to see if a user is enrolled.
+
     mapping (address => bool) enrolled;
 
     // Let's make sure everyone knows who owns the bank, yes, fill in the
     // appropriate visilibility keyword
-    //address owner = msg.sender;
+
+    address public owner = msg.sender ;
     
     /* Events - publicize actions to external listeners
      */
     
     // Add an argument for this event, an accountAddress
+
     event LogEnrolled(address accountAddress);
 
     // Add 2 arguments for this event, an accountAddress and an amount
@@ -44,6 +42,27 @@ contract SimpleBank {
     // Hint: it should take 3 arguments: an accountAddress, withdrawAmount and a newBalance 
     event LogWithdrawal(address accountAddress, uint withdrawAmount, uint newBalance);
 
+
+
+      // @notice onlyEnrolled
+    // Ensures the msg.sender has already been enrolled before executing a function
+    modifier onlyEnrolled {
+        require(
+            enrolled[msg.sender] == true,
+            "Only enrolled accounts can call this function."
+        );
+        _;
+    }
+
+      // @notice notEnrolled
+    // Ensures the msg.sender has not already been enrolled before executing a function
+    modifier notEnrolled {
+        require(
+            enrolled[msg.sender] == false,
+            "Only accounts not enrolled can call this function."
+        );
+        _;
+    }
     /* Functions
      */
 
@@ -69,35 +88,32 @@ contract SimpleBank {
         return balances[msg.sender]; 
     }
 
-    /// @notice Enroll a customer with the bank
+   
+  
+    // Emit the appropriate event
+    
+     /// @notice Enroll a customer with the bank
     /// @return The users enrolled status
     // Emit the appropriate event
-    function enroll(address newCustumor) public returns (bool){
-      // 1. enroll of the sender of this transaction
-      newCustumor = msg.sender;
-      enrolled[newCustumor] = true;
-      emit LogEnrolled(newCustumor);
-
-      return enrolled[newCustumor];
-
+    function enroll() public notEnrolled returns (bool){ // add modifier so a user cannot enroll more than once
+        enrolled[msg.sender] = true;
+        emit LogEnrolled(msg.sender);
+        return enrolled[msg.sender];
     }
 
     /// @notice Deposit ether into bank
     /// @return The balance of the user after the deposit is made
-    function deposit(uint amount) public payable returns (uint) {
-      // 1. Add the appropriate keyword so that this function can receive ether
-    
-      // 2. Users should be enrolled before they can make deposits
-        require(enrolled[msg.sender] == true);
-      // 3. Add the amount to the user's balance. Hint: the amount can be
-      //    accessed from of the global variable `msg`
-        balances[msg.sender] = balances[msg.sender] + amount;
-      // 4. Emit the appropriate event associated with this function
-        emit LogDepositMade(msg.sender, msg.value);
-      // 5. return the balance of sndr of this transaction
-
-      return balances[msg.sender];
+    // Add the appropriate keyword so that this function can receive ether
+    // Use the appropriate global variables to get the transaction sender and value
+    // Emit the appropriate event
+    function deposit() public payable onlyEnrolled returns (uint) { // add modifer to ensure only enrolled users can deposit funds
+        /* Add the amount to the user's balance, call the event associated with a deposit,
+          then return the balance of the user */
+        balances[msg.sender] += msg.value;
+        emit LogDepositMade(msg.sender, balances[msg.sender]);
+        return balances[msg.sender];
     }
+
 
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
