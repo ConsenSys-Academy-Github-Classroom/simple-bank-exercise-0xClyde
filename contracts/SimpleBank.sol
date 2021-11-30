@@ -9,7 +9,13 @@ pragma solidity >=0.5.16 <0.9.0;
 contract SimpleBank {
 
     /* State variables
+
+    
      */
+
+         address public owner = msg.sender;
+
+
     
     
     // Fill in the visibility keyword. 
@@ -24,8 +30,6 @@ contract SimpleBank {
     // Let's make sure everyone knows who owns the bank, yes, fill in the
     // appropriate visilibility keyword
     //address owner = msg.sender;
-    
-    address public owner = msg.sender ;
     
     /* Events - publicize actions to external listeners
      */
@@ -68,26 +72,26 @@ contract SimpleBank {
     /// @notice Enroll a customer with the bank
     /// @return The users enrolled status
     // Emit the appropriate event
-    function enroll() public returns (bool){
+    function enroll(address newCustumor) public returns (bool){
       // 1. enroll of the sender of this transaction
+      newCustumor = msg.sender;
+      enrolled[newCustumor] = true;
+      emit LogEnrolled(newCustumor);
 
-      enrolled[msg.sender] = true;
-      emit LogEnrolled(msg.sender);
-
-      return enrolled[msg.sender];
+      return enrolled[newCustumor];
 
     }
 
     /// @notice Deposit ether into bank
     /// @return The balance of the user after the deposit is made
-    function deposit() public payable returns (uint) {
+    function deposit(uint amount) public payable returns (uint) {
       // 1. Add the appropriate keyword so that this function can receive ether
     
       // 2. Users should be enrolled before they can make deposits
         require(enrolled[msg.sender] == true);
       // 3. Add the amount to the user's balance. Hint: the amount can be
       //    accessed from of the global variable `msg`
-        balances[msg.sender] = balances[msg.sender] + msg.value;
+        balances[msg.sender] = balances[msg.sender] + amount;
       // 4. Emit the appropriate event associated with this function
         emit LogDepositMade(msg.sender, msg.value);
       // 5. return the balance of sndr of this transaction
